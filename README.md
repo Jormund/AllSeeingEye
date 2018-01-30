@@ -1,2 +1,2 @@
 # AllSeingEye
-IITC plugin
+IITC plugin by @Xandrexgress
