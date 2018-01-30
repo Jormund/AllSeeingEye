@@ -4,24 +4,16 @@
 // @category       Info
 // @version        0.3
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
-// @downloadURL    https://raw.githubusercontent.com/Jormund/extract_log/master/extract_log.user.jsTBDTBD
+// @downloadURL    https://cdn.rawgit.com/Jormund/AllSeingEye/master/AllSeeingEye.user.js
 // @description    [2016-10-09-03] All Seeing Eye
 // @include        https://www.ingress.com/intel*
 // @match          https://www.ingress.com/intel*
-// @include        https://www.ingress.com/mission/*
-// @match          https://www.ingress.com/mission/*
 // @include        http://www.ingress.com/intel*
 // @match          http://www.ingress.com/intel*
-// @include        http://www.ingress.com/mission/*
-// @match          http://www.ingress.com/mission/*
 // @include        https://ingress.com/intel*
 // @match          https://ingress.com/intel*
-// @include        https://ingress.com/mission/*
-// @match          https://ingress.com/mission/*
 // @include        http://ingress.com/intel*
 // @match          http://ingress.com/intel*
-// @include        http://ingress.com/mission/*
-// @match          http://ingress.com/mission/*
 // @grant          none 
 // ==/UserScript==
 
