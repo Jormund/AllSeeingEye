@@ -2,10 +2,10 @@
 // @id             iitc-plugin-AllSeeingEye@Xandrex
 // @name           IITC plugin: AllSeeingEye
 // @category       Info
-// @version        0.3
+// @version        0.4
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
 // @downloadURL    https://cdn.rawgit.com/Jormund/AllSeeingEye/master/AllSeeingEye.user.js
-// @description    [2016-10-09-03] All Seeing Eye
+// @description    [2018-02-02] All Seeing Eye
 // @include        https://www.ingress.com/intel*
 // @match          https://www.ingress.com/intel*
 // @include        http://www.ingress.com/intel*
@@ -29,11 +29,11 @@ function wrapper(plugin_info) {
 
     window.plugin.AllSeeingEye.KEY_STORAGE = 'AllSeeingEye-storage';
     window.plugin.AllSeeingEye.EXPORT_TYPE = {
-        IITCRAWJSON: {code:'IITCRAWJSON',name:'Raw JSON'},
-        IITCHTML:    {code:'IITCHTML'   ,name:'IITC HTML'},
-        TABULAR:     {code:'TABULAR'    ,name:'Tabular'},
-        MU:          {code:'MU'         ,name:'Mind Units'} 
-    }
+        IITCRAWJSON: {code:'IITCRAWJSON',name:'Raw JSON'  },
+        IITCHTML:    {code:'IITCHTML'   ,name:'IITC HTML' },
+        TABULAR:     {code:'TABULAR'    ,name:'Tabular'   },
+        MU:          {code:'MU'         ,name:'Mind Units'}
+    };
     window.plugin.AllSeeingEye.DEFAULT_EXPORT_TYPE = window.plugin.AllSeeingEye.EXPORT_TYPE.MU;
     window.plugin.AllSeeingEye.chatRawData = [];
 
@@ -68,13 +68,52 @@ function wrapper(plugin_info) {
     /** get log **************************************************************************************************************************************************/
     /***************************************************************************************************************************************************************/
     window.plugin.AllSeeingEye.extractClicked = function () {
-
-        var options = {
+        let options = {
             exportType: window.plugin.AllSeeingEye.storage.exportType
         };
         window.plugin.AllSeeingEye.extractAndDisplay(options);
-    }
+    };
 
+    // toggle player selection (all lines) within the table -------------------
+    window.plugin.AllSeeingEye.togglePlayer = function (myPlayerName) {
+        console.log ('togglePlayer : start' + myPlayerName + '--');
+        let linesCardinal = document.getElementsByClassName('sumXDX').length;
+        let myBox;
+        let mySum=0;
+        let myGlobalToggle;
+        for (let i=0 ; i<linesCardinal ; i++) {
+            myBox = document.getElementById('checkboxXDX'+i);
+			// test if line relevant to the user
+			console.log (i+':'+myBox.parentNode.nextSibling.innerHTML);
+			if (myPlayerName == myBox.parentNode.nextSibling.innerHTML) {
+				console.log (myBox.parentNode.nextSibling.innerHTML);
+				if (undefined===myGlobalToggle) {
+					myGlobalToggle = !(myBox.checked);
+				} // END IF
+				myBox.checked = myGlobalToggle;
+			} // END IF			
+        } // END FOR
+		window.plugin.AllSeeingEye.doSUM();
+    };
+    // end function
+
+    // sums MU for all lines in the table -------------------------------------
+    window.plugin.AllSeeingEye.doSUM = function () {
+        console.log ('calling doSUM');
+        let linesCardinal = document.getElementsByClassName('sumXDX').length;
+        let myBox;
+        let mySum=0;
+        for (let i=0 ; i<linesCardinal ; i++) {
+            myBox = document.getElementById('checkboxXDX'+i);
+            if (myBox.checked) {
+                mySum += Number ( myBox.parentNode.nextSibling.nextSibling.innerHTML.replace('+','') );
+            }
+        }
+        document.getElementById('totalXDX').innerHTML = (mySum+'').replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1&apos;') ;
+        // add thousands seperator
+    };
+
+    // where the action takes place ! -----------------------------------------
     window.plugin.AllSeeingEye.extractAndDisplay = function (options) {
         if (typeof options == 'undefined') options = {};
         if (typeof options.exportType == 'undefined') options.type = window.plugin.AllSeeingEye.DEFAULT_EXPORT_TYPE;
@@ -82,20 +121,20 @@ function wrapper(plugin_info) {
         try {
             window.plugin.AllSeeingEye.log('Start of extract log');
             var msg = '';
-            var html = '';
-            var htmlTable = ''; // XDX for MU
-            
-            if(options.exportType == window.plugin.AllSeeingEye.EXPORT_TYPE.IITCRAWJSON){
+            let html = '';
+            let htmlTable = ''; // XDX for MU
+
+            if      (options.exportType == window.plugin.AllSeeingEye.EXPORT_TYPE.IITCRAWJSON) {
                 html = JSON.stringify(window.plugin.AllSeeingEye.chatRawData);
             }
-            else if(options.exportType == window.plugin.AllSeeingEye.EXPORT_TYPE.IITCHTML) {
+            else if (options.exportType == window.plugin.AllSeeingEye.EXPORT_TYPE.IITCHTML   ) {
                 $.each(window.chat._public.data, function (index, chatLine) {
                     //html+= '\r\n'+chatLine[0]+' '+chatLine[1]+' '+chatLine[2];
                     html+= '\r\n'+chatLine[2];
                 });
             }
-            else if(options.exportType == window.plugin.AllSeeingEye.EXPORT_TYPE.TABULAR) {
-                var html = 'GUID'+
+            else if (options.exportType == window.plugin.AllSeeingEye.EXPORT_TYPE.TABULAR    ) {
+                html = 'GUID'+
                             '\tTimestamp'+
                             '\tDate'+
                             '\tPlayer name'+
@@ -147,7 +186,7 @@ function wrapper(plugin_info) {
                                     break;
 
                                   case 'TEXT':
-                                    //TODO detect all parts
+                                    // TODO detect all parts
 //                                    if(isNumberRegex.test(markup[1].plain)){
 //                                        MU = markup[1].plain;//if number then it's MU
 //                                    }
@@ -191,7 +230,9 @@ function wrapper(plugin_info) {
                                     //msg += $('<div/>').text(markup[0]+':<'+markup[1].plain+'>').html();
                                     break;
                             }
+                            // END SWITCH
                         });
+                        // END EACH
                         html+= '\r\n'+guid+
                                 '\t'+timestamp+
                                 '\t'+IITCformatedDateTime+
@@ -208,16 +249,16 @@ function wrapper(plugin_info) {
                 });
             }
             else if(options.exportType == window.plugin.AllSeeingEye.EXPORT_TYPE.MU) {
-                var html =  'Date'+
+                html =  'Date'+
                             '\tPlayer name'+
                             '\tMU'+
                             '\tFull text'+
                             '';
 
-                var tableRowNumber = 0; // XDX
+                let tableRowNumber = 0; // XDX
                 $.each(window.plugin.AllSeeingEye.chatRawData, function (index, chatDataBlock) {
                     $.each(chatDataBlock.result, function (index, chatLine) {
-                        
+
                         var guid = chatLine[0];
                         var timestamp = chatLine[1];
                         var messageDate = new Date(timestamp);
@@ -234,15 +275,15 @@ function wrapper(plugin_info) {
                         var actionText = '';
                         var MU = '';
                         var portals = [];
-                        var sender = {};
+                        sender = {};
                         var authorType = plext.plextType;//SYSTEM_BROADCAST ou PLAYER_GENERATED
                         var isNumberRegex = /^\-?\d+$/;
-                        var playerColour=''; // XDX
-                        
+                        let playerColour=''; // XDX
+
                         // keep lines only for MUs actions (create or destroy Control Field) // XDX
-                        var extractMURegex = /[-+]\d+(?= MU)/; // XDX keep sign at all times
+                        let extractMURegex = /[-+]\d+(?= MU)/; // XDX keep sign at all times
                         if (extractMURegex.test(fullText)) {
-                            
+
                             MU =  extractMURegex.exec(fullText)[0];
 
                             $.each(markups, function(ind, markup) {
@@ -252,17 +293,16 @@ function wrapper(plugin_info) {
                                 } // END IF
                             });
 
-                                       
                             // if other faction gains MUs, it does not concern our operation
                             // operation can be concerned in the three following cases:
                             //  - a faction member gains MU by creating a faction CF
                             //  - a faction member loses MU by destroying a faction CF using a virus
                             //  - an opposite faction member lowers MU by destroying a faction CF
-                            if ( !( (player.team!= window.PLAYER.team) && (-1 != MU.indexOf('+')) ) ) {
+                            //if ( !( (player.team!= window.PLAYER.team) && (-1 != MU.indexOf('+')) ) ) {
 
                                 fullText = fullText.replace(/.*Control Field @([^(]*).*/,'$1'); // XDX shorten the full text
-                                playerColour = ('RESISTANCE'==player.team ? '#0088FF' : '#03DC03')  // XDX hardcoded colours from official chat
-                 
+                                playerColour = ('RESISTANCE'==player.team ? '#0088FF' : '#03DC03');  // XDX hardcoded colours from official chat
+
                                 html+=
                                      '\r\n'
                                     +''  +IITCformatedDateTime
@@ -270,29 +310,29 @@ function wrapper(plugin_info) {
                                     +'\t'+MU
                                     +'\t'+fullText
                                     +'';
-                                    
+
                                 // create the table line, in reverse.
                                 htmlTable =
                                      "\n<tr>"
                                     +'<td>'+IITCformatedDateTime+'</td>'
-                                    +'<td><input class="sumXDX" id="checkboxXDX'+tableRowNumber+'" type="checkbox" checked="checked" onclick="doSUM();"/></td>'
-                                    +'<td style="color:'+playerColour+'">'+player.name+'</td>'
+                                    +'<td><input class="sumXDX" id="checkboxXDX'+tableRowNumber+'" type="checkbox" checked="checked" onclick="window.plugin.AllSeeingEye.doSUM();"/></td>'
+                                    +'<td style="color:'+playerColour+'" onclick="window.plugin.AllSeeingEye.togglePlayer(\''+player.name+'\');">'+player.name+'</td>'
                                     +'<td style="text-align:right;">'+MU+'</td>'
                                     +'<td>'+fullText+'</td>'
                                     +'</tr>'
                                     + "\n"+htmlTable;
                                 tableRowNumber++;
-                            }
+                            //} // END IF
                             // END IF ( !( (player.team!= window.PLAYER.team) && (-1 != MU.indexOf('+')) ) ) {
                         }
                         // END IF (extractMURegex.test(fullText)){
-                            
+
                     });
                     // END FUNCTION $.each(chatDataBlock.result, function (index, chatLine) {
-                    
+
                 });
                 // END FUNCTION $.each(window.plugin.AllSeeingEye.chatRawData, function (index, chatDataBlock) {
-                    
+
                 htmlTable =
                      '<hr /><form id="formXDX">'
                     +'    <table summary="lala" id="table1" style="border: solid blue 1px;">'
@@ -315,22 +355,12 @@ function wrapper(plugin_info) {
                     +'    <span id="totalXDX">-999999</span>'
                     +'</div><hr />'
                     +'<script type="text/javascript">'
-                    +'    function doSUM() { console.log("calling doSUM");'
-                    +'        var linesCardinal = document.getElementsByClassName("sumXDX").length;'
-                    +'        var myBox;'
-                    +'        var mySum=0;'
-                    +'        for (var i=0 ; i<linesCardinal ; i++) {'
-                    +'            myBox = document.getElementById("checkboxXDX"+i);'
-                    +'            if (myBox.checked) mySum += Number ( myBox.parentNode.nextSibling.nextSibling.innerHTML.replace("+","") );'
-                    +'        }'
-                    +'        document.getElementById("totalXDX").innerHTML = (mySum+"").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1&apos;") ;'
-                    +'    }'
-                    +'    doSUM();'
+                    +'    window.plugin.AllSeeingEye.doSUM();'
                     +'</script>';
                     ;
                     /*
                     */
-                
+
             }
             // END else if(options.exportType == window.plugin.AllSeeingEye.EXPORT_TYPE.MU) {
             else {
@@ -339,24 +369,23 @@ function wrapper(plugin_info) {
 
             html = '<textarea>' + html + '</textarea>';
             html = html + htmlTable; // XDX
-    
-            
+
             dialog({
                 html: html,
                 id: 'AllSeeingEye_result',
-                title: 'Log',
-                width: 900 // XDX
+                title: 'The All Seeing Eye',
+                width: 701 // XDX
             });
 
             window.plugin.AllSeeingEye.log('End of extract log');
-        } 
+        }
         catch (err) {
             if (window.plugin.AllSeeingEye.isSmart)
                 window.plugin.AllSeeingEye.log(err.stack, true);
             else
                 throw err;
         }
-    }
+    };
     /***************************************************************************************************************************************************************/
     //Options//
     /*********/
@@ -364,8 +393,8 @@ function wrapper(plugin_info) {
         window.plugin.AllSeeingEye.storage.exportType = window.plugin.AllSeeingEye.DEFAULT_EXPORT_TYPE;
         window.plugin.AllSeeingEye.saveStorage();
         window.plugin.AllSeeingEye.openOptDialog();
-    }
-    
+    };
+
     window.plugin.AllSeeingEye.saveOpt = function () {
         var exportType = $('#AllSeeingEye-exportType').val();
         if(typeof window.plugin.AllSeeingEye.EXPORT_TYPE[exportType] != 'undefined') {
@@ -373,36 +402,36 @@ function wrapper(plugin_info) {
             window.plugin.AllSeeingEye.storage.exportType = exportType;
         }
         window.plugin.AllSeeingEye.saveStorage();
-    }
-    
+    };
+
     window.plugin.AllSeeingEye.optClicked = function () {
         window.plugin.AllSeeingEye.openOptDialog();
-    }
-    
+    };
+
     window.plugin.AllSeeingEye.openOptDialog = function () {
 
         var html =
-		'<div>' +
-			'<table>';
+        '<div>' +
+            '<table>';
                 html +=
-        			'<tr>' +
-        				'<td>' +
-        					'Format' +
-        				'</td>' +
-        				'<td>' +
+                    '<tr>' +
+                        '<td>' +
+                            'Format' +
+                        '</td>' +
+                        '<td>' +
                             '<select id="AllSeeingEye-exportType">';
                             for(typeCode in window.plugin.AllSeeingEye.EXPORT_TYPE){
                                 var type = window.plugin.AllSeeingEye.EXPORT_TYPE[typeCode];
                                 html+= '<option value="'+type.code+'" '+
-                                    (window.plugin.AllSeeingEye.storage.exportType == type ? 'selected="selected" ' : '') + 
+                                    (window.plugin.AllSeeingEye.storage.exportType == type ? 'selected="selected" ' : '') +
                                     '>' + type.name+'</option>';
                             }
                 html += '</select>'+
-        				'</td>' +
-        			'</tr>';
+                        '</td>' +
+                    '</tr>';
         html +=
-			'</table>' +
-		'</div>'
+            '</table>' +
+        '</div>'
         ;
 
         dialog({
@@ -420,14 +449,14 @@ function wrapper(plugin_info) {
                 }
             }
         });
-    }
+    };
 
     /***************************************************************************************************************************************************************/
     window.plugin.AllSeeingEye.clearLog = function () {
         if (window.plugin.AllSeeingEye.isSmart) {
             $('#AllSeeingEye-log').html();
         }
-    }
+    };
 
     window.plugin.AllSeeingEye.log = function (text, isError) {
         if (window.plugin.AllSeeingEye.debug || isError) {
@@ -438,43 +467,36 @@ function wrapper(plugin_info) {
                 console.log(text);
             }
         }
-    }
+    };
 
     /***************************************************************************************************************************************************************/
 
     var setup = function () {
-
         window.plugin.AllSeeingEye.isSmart = window.isSmartphone();
-
         window.plugin.AllSeeingEye.loadStorage();
-        
+
         // toolbox menu
         $('#toolbox').after('<div id="AllSeeingEye-toolbox" style="padding:3px;"></div>');
         var elToolbox = $('#AllSeeingEye-toolbox');
         elToolbox.append(' <strong>Extract log : </strong>');
         elToolbox.append('<a onclick="window.plugin.AllSeeingEye.extractClicked()" title="Extract log">Extract</a>&nbsp;&nbsp;');
-        elToolbox.append('<a onclick="window.plugin.AllSeeingEye.optClicked()" title="Preferences">Opt</a>&nbsp;&nbsp;');
-        
+        elToolbox.append('<a onclick="window.plugin.AllSeeingEye.optClicked()"     title="Preferences">Opt</a>&nbsp;&nbsp;');
         if (window.plugin.AllSeeingEye.isSmart) {
             $('#AllSeeingEye-toolbox').append('<div id="AllSeeingEye-log"></div>');
         }
-
         window.addHook('publicChatDataAvailable', function (data) {
             window.plugin.AllSeeingEye.chatRawData.push(data.raw);
         });
-
-    }
-
+    };
     // PLUGIN END //////////////////////////////////////////////////////////
-
 
     setup.info = plugin_info; //add the script info data to the function as a property
     if (!window.bootPlugins) {
         window.bootPlugins = [];
     }
-    
+
     window.bootPlugins.push(setup);
-    
+
     // if IITC has already booted, immediately run the 'setup' function
     if (window.iitcLoaded && typeof setup === 'function') {
         setup();
@@ -485,7 +507,10 @@ function wrapper(plugin_info) {
 var script = document.createElement('script');
 var info = {};
 if (typeof GM_info !== 'undefined' && GM_info && GM_info.script) {
-    info.script = { version: GM_info.script.version, name: GM_info.script.name, description: GM_info.script.description };
+    info.script = {  version: GM_info.script.version
+                   , name: GM_info.script.name
+                   , description: GM_info.script.description
+                  };
 }
 
 script.appendChild(document.createTextNode('(' + wrapper + ')(' + JSON.stringify(info) + ');'));
