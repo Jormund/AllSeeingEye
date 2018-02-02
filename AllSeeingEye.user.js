@@ -2,7 +2,7 @@
 // @id             iitc-plugin-AllSeeingEye@Xandrex
 // @name           IITC plugin: AllSeeingEye
 // @category       Info
-// @version        0.4
+// @version        0.5
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
 // @downloadURL    https://cdn.rawgit.com/Jormund/AllSeeingEye/master/AllSeeingEye.user.js
 // @description    [2018-02-02] All Seeing Eye
@@ -38,7 +38,7 @@ function wrapper(plugin_info) {
     window.plugin.AllSeeingEye.chatRawData = [];
 
     window.plugin.AllSeeingEye.storage = {};
-    exportType: window.plugin.AllSeeingEye.DEFAULT_EXPORT_TYPE,
+    //exportType: window.plugin.AllSeeingEye.DEFAULT_EXPORT_TYPE,
 
     window.plugin.AllSeeingEye.isSmart = undefined; //will be true on smartphones after setup
 
@@ -76,30 +76,31 @@ function wrapper(plugin_info) {
 
     // toggle player selection (all lines) within the table -------------------
     window.plugin.AllSeeingEye.togglePlayer = function (myPlayerName) {
-        console.log ('togglePlayer : start' + myPlayerName + '--');
+        //console.log ('togglePlayer : start' + myPlayerName + '--');
         let linesCardinal = document.getElementsByClassName('sumXDX').length;
         let myBox;
         let mySum=0;
         let myGlobalToggle;
         for (let i=0 ; i<linesCardinal ; i++) {
             myBox = document.getElementById('checkboxXDX'+i);
-			// test if line relevant to the user
-			console.log (i+':'+myBox.parentNode.nextSibling.innerHTML);
-			if (myPlayerName == myBox.parentNode.nextSibling.innerHTML) {
-				console.log (myBox.parentNode.nextSibling.innerHTML);
-				if (undefined===myGlobalToggle) {
-					myGlobalToggle = !(myBox.checked);
-				} // END IF
-				myBox.checked = myGlobalToggle;
-			} // END IF			
+            // test if line relevant to the user
+            //console.log (i+':'+myBox.parentNode.nextSibling.innerHTML);
+            if (myPlayerName == myBox.parentNode.nextSibling.innerHTML) {
+                //console.log (myBox.parentNode.nextSibling.innerHTML);
+                if (undefined===myGlobalToggle) {
+                    myGlobalToggle = !(myBox.checked);
+                } // END IF
+                myBox.checked = myGlobalToggle;
+            }
+            // END IF
         } // END FOR
-		window.plugin.AllSeeingEye.doSUM();
+        window.plugin.AllSeeingEye.doSUM();
     };
     // end function
 
     // sums MU for all lines in the table -------------------------------------
     window.plugin.AllSeeingEye.doSUM = function () {
-        console.log ('calling doSUM');
+        //console.log ('calling doSUM');
         let linesCardinal = document.getElementsByClassName('sumXDX').length;
         let myBox;
         let mySum=0;
@@ -186,7 +187,7 @@ function wrapper(plugin_info) {
                                     break;
 
                                   case 'TEXT':
-                                    // TODO detect all parts
+                                    // detect all parts
 //                                    if(isNumberRegex.test(markup[1].plain)){
 //                                        MU = markup[1].plain;//if number then it's MU
 //                                    }
@@ -197,7 +198,7 @@ function wrapper(plugin_info) {
 
                                     break;
 
-                                  case 'AT_PLAYER'://TODO: handle this
+                                  case 'AT_PLAYER':// handle this one day
 //                                    var thisToPlayer = (markup[1].plain == ('@'+window.PLAYER.nickname));
 //                                    var spanClass = thisToPlayer ? "pl_nudge_me" : (markup[1].team + " pl_nudge_player");
 //                                    var atPlayerName = markup[1].plain.replace(/^@/, "");
@@ -256,77 +257,87 @@ function wrapper(plugin_info) {
                             '';
 
                 let tableRowNumber = 0; // XDX
+                let previousguid = 'aaa'; // XDX init comparaison doublon de GUID
                 $.each(window.plugin.AllSeeingEye.chatRawData, function (index, chatDataBlock) {
                     $.each(chatDataBlock.result, function (index, chatLine) {
 
-                        var guid = chatLine[0];
-                        var timestamp = chatLine[1];
-                        var messageDate = new Date(timestamp);
-                        var stringDate = messageDate.toString();
-                        var UTCStringDate = messageDate.toUTCString();
-                        var IITCformatedDateTime = unixTimeToDateTimeString(timestamp, true);//unixTimeToDateTimeString defined in IITC
-                        IITCformatedDateTime = IITCformatedDateTime.substring(11);
-                        var plext = chatLine[2].plext;
-                        var fullText = plext.text;
-                        var markups = plext.markup;
-                        var player = {};
-                        var sender = {};
-                        var atPlayer = {};
-                        var actionText = '';
-                        var MU = '';
-                        var portals = [];
-                        sender = {};
-                        var authorType = plext.plextType;//SYSTEM_BROADCAST ou PLAYER_GENERATED
-                        var isNumberRegex = /^\-?\d+$/;
-                        let playerColour=''; // XDX
+                        let guid = chatLine[0];
+                        if (previousguid!=guid) { // compare if doublon de log
+                            previousguid=guid;
+                            //var sender = {};
+                            //var atPlayer = {};
+                            //var actionText = '';
+                            //var portals = [];
+                            //var isNumberRegex = /^\-?\d+$/;
 
-                        // keep lines only for MUs actions (create or destroy Control Field) // XDX
-                        let extractMURegex = /[-+]\d+(?= MU)/; // XDX keep sign at all times
-                        if (extractMURegex.test(fullText)) {
+                            let timestamp = chatLine[1];
+                            //let messageDate = new Date(timestamp);
+                            //let stringDate = messageDate.toString();
+                            //let UTCStringDate = messageDate.toUTCString();
 
-                            MU =  extractMURegex.exec(fullText)[0];
+                            let IITCformatedDateTime = unixTimeToDateTimeString(timestamp, true);//unixTimeToDateTimeString defined in IITC
+                                IITCformatedDateTime = IITCformatedDateTime.substring(11);
+                            let plext = chatLine[2].plext;
+                            //let authorType = plext.plextType;//SYSTEM_BROADCAST ou PLAYER_GENERATED
+                            let fullText = plext.text;
+                            let markups = plext.markup;
+                            let player = {};
+                            let MU = 'bbbb';
+                            let playerColour=''; // XDX
 
-                            $.each(markups, function(ind, markup) {
-                                if ('PLAYER' == markup[0]) {
-                                        player.name = markup[1].plain;
-                                        player.team = markup[1].team;
-                                } // END IF
-                            });
+                            // keep lines only for MUs actions (create or destroy Control Field) // XDX
+                            let extractMURegex = /[-+]\d+(?= MU)/; // XDX keep sign at all times
+                            if (extractMURegex.test(fullText)) {
 
-                            // if other faction gains MUs, it does not concern our operation
-                            // operation can be concerned in the three following cases:
-                            //  - a faction member gains MU by creating a faction CF
-                            //  - a faction member loses MU by destroying a faction CF using a virus
-                            //  - an opposite faction member lowers MU by destroying a faction CF
-                            //if ( !( (player.team!= window.PLAYER.team) && (-1 != MU.indexOf('+')) ) ) {
+                                console.log (chatLine);
+                                MU =  extractMURegex.exec(fullText)[0];
 
-                                fullText = fullText.replace(/.*Control Field @([^(]*).*/,'$1'); // XDX shorten the full text
-                                playerColour = ('RESISTANCE'==player.team ? '#0088FF' : '#03DC03');  // XDX hardcoded colours from official chat
+                                $.each(markups, function(ind, markup) {
+                                    if ('PLAYER' == markup[0]) {
+                                            player.name = markup[1].plain;
+                                            player.team = markup[1].team;
+                                    } // END IF
+                                });
 
-                                html+=
-                                     '\r\n'
-                                    +''  +IITCformatedDateTime
-                                    +'\t'+player.name
-                                    +'\t'+MU
-                                    +'\t'+fullText
-                                    +'';
+                                // if other faction gains MUs, it does not concern our operation
+                                // operation can be concerned in the three following cases:
+                                //  - a faction member gains MU by creating a faction CF
+                                //  - a faction member loses MU by destroying a faction CF using a virus
+                                //  - an opposite faction member lowers MU by destroying a faction CF
+                                //if ( !( (player.team!= window.PLAYER.team) && (-1 != MU.indexOf('+')) ) ) {
 
-                                // create the table line, in reverse.
-                                htmlTable =
-                                     "\n<tr>"
-                                    +'<td>'+IITCformatedDateTime+'</td>'
-                                    +'<td><input class="sumXDX" id="checkboxXDX'+tableRowNumber+'" type="checkbox" checked="checked" onclick="window.plugin.AllSeeingEye.doSUM();"/></td>'
-                                    +'<td style="color:'+playerColour+'" onclick="window.plugin.AllSeeingEye.togglePlayer(\''+player.name+'\');">'+player.name+'</td>'
-                                    +'<td style="text-align:right;">'+MU+'</td>'
-                                    +'<td>'+fullText+'</td>'
-                                    +'</tr>'
-                                    + "\n"+htmlTable;
-                                tableRowNumber++;
-                            //} // END IF
-                            // END IF ( !( (player.team!= window.PLAYER.team) && (-1 != MU.indexOf('+')) ) ) {
+                                    fullText = fullText.replace(/.*Control Field @([^(]*).*/,'$1'); // XDX shorten the full text
+                                    console.log ('a:'+fullText);
+                                    fullText = fullText.replace(/ /g,'&nbsp;');
+                                    console.log ('z:'+fullText);
+                                    playerColour = ('RESISTANCE'==player.team ? '#0088FF' : '#03DC03');  // XDX hardcoded colours from official chat
+
+                                    html+=
+                                         '\r\n'
+                                        +''  +IITCformatedDateTime
+                                        +'\t'+player.name
+                                        +'\t'+MU
+                                        +'\t'+fullText
+                                        +'';
+
+                                    // create the table line, in reverse.
+                                    htmlTable =
+                                         "\n<tr>"
+                                        +'<td>'+IITCformatedDateTime+'</td>'
+                                        +'<td><input class="sumXDX" id="checkboxXDX'+tableRowNumber+'" type="checkbox" checked="checked" onclick="window.plugin.AllSeeingEye.doSUM();"/></td>'
+                                        +'<td style="color:'+playerColour+'" onclick="window.plugin.AllSeeingEye.togglePlayer(\''+player.name+'\');">'+player.name+'</td>'
+                                        +'<td style="text-align:right;">'+MU+'</td>'
+                                        +'<td>'+fullText+'</td>'
+                                        +'</tr>'
+                                        + "\n"+htmlTable;
+                                    tableRowNumber++;
+                                //} // END IF
+                                // END IF ( !( (player.team!= window.PLAYER.team) && (-1 != MU.indexOf('+')) ) ) {
+                            }
+                            // END IF (extractMURegex.test(fullText)){
                         }
-                        // END IF (extractMURegex.test(fullText)){
-
+                        // END IF compare doublon de GUID
+                        
                     });
                     // END FUNCTION $.each(chatDataBlock.result, function (index, chatLine) {
 
@@ -371,10 +382,10 @@ function wrapper(plugin_info) {
             html = html + htmlTable; // XDX
 
             dialog({
-                html: html,
-                id: 'AllSeeingEye_result',
-                title: 'The All Seeing Eye',
-                width: 701 // XDX
+                  html :html
+                , id   :'AllSeeingEye_result'
+                , title:'The All Seeing Eye'
+                , width:501 // XDX
             });
 
             window.plugin.AllSeeingEye.log('End of extract log');
@@ -464,7 +475,7 @@ function wrapper(plugin_info) {
                 $('#AllSeeingEye-log').prepend(text + '<br/>');
             }
             else {
-                console.log(text);
+                console.log (text);
             }
         }
     };
@@ -501,7 +512,8 @@ function wrapper(plugin_info) {
     if (window.iitcLoaded && typeof setup === 'function') {
         setup();
     }
-} // wrapper end
+}
+// wrapper end
 
 // inject code into site context
 var script = document.createElement('script');
