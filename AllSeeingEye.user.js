@@ -2,9 +2,9 @@
 // @id             iitc-plugin-AllSeeingEye@Xandrex
 // @name           IITC plugin: AllSeeingEye
 // @category       Info
-// @version        0.5
+// @version        0.6
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
-// @downloadURL    https://cdn.rawgit.com/Jormund/AllSeeingEye/master/AllSeeingEye.user.js
+// @downloadURL    https://raw.githubusercontent.com/Jormund/AllSeeingEye/master/AllSeeingEye.user.js
 // @description    [2018-02-02] All Seeing Eye
 // @include        https://ingress.com/intel*
 // @include        http://ingress.com/intel*
