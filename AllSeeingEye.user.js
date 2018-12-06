@@ -4,7 +4,7 @@
 // @category       Info
 // @version        0.5
 // @namespace      https://github.com/jonatkins/ingress-intel-total-conversion
-// @downloadURL    https://cdn.rawgit.com/Jormund/AllSeeingEye/master/AllSeeingEye.user.js
+// @downloadURL    https://cdn.jsdelivr.net/gh/Jormund/AllSeeingEye/AllSeeingEye.user.js
 // @description    [2018-02-02] All Seeing Eye
 // @include        https://ingress.com/intel*
 // @include        http://ingress.com/intel*
