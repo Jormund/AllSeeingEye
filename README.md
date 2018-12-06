@@ -1,3 +1,3 @@
 # AllSeingEye
 IITC plugin by @Xandrexgress  
-Download: https://cdn.rawgit.com/Jormund/AllSeingEye/master/AllSeeingEye.user.js
+Download: https://raw.githubusercontent.com/Jormund/AllSeeingEye/master/AllSeeingEye.user.js
